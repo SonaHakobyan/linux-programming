@@ -17,7 +17,7 @@ int ComplexNumber::getImag() const
       return imag;
 }
 
-int ComplexNumber::absolute() {
+int ComplexNumber::absolute() const {
 	return sqrt(real * real + imag * imag);
 }
 

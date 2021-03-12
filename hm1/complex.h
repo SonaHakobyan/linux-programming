@@ -49,7 +49,7 @@ public:
 	/// Calculates absolute value
 	/// </summary>
 	/// <returns></returns>
-	int absolute();
+	int absolute() const;
 
 	/// <summary>
 	/// Print complex number
