@@ -3,7 +3,7 @@
 
 int main()
 {
-    ParallelCalculator* calculator = new ParallelCalculator(100, 10);
+    ParallelCalculator* calculator = new ParallelCalculator(10, 2);
 
     calculator->sum();
 

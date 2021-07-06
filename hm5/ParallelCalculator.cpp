@@ -12,19 +12,14 @@ ParallelCalculator::ParallelCalculator(int arrayCapacity, int workersCount)
     this->array = new int[this->arrayCapacity];
     this->workers = new pid_t[this->workersCount];
 
-    this->parentChildFileDes = new int*[this->workersCount];
-    this->childParentFileDes = new int*[this->workersCount];
-
-    for (int i = 0; i < this->workersCount; ++i) 
-    {
-        this->parentChildFileDes[i] = new int[2];
-        this->childParentFileDes[i] = new int[2];
-    }
+    this->parentChildFileDes = new int[this->workersCount][2];
+    this->childParentFileDes = new int[this->workersCount][2];
     
     // fill array with random numbers
-    for(int i = 0; i < this->workersCount; ++i)
+    for(int i = 0; i < this->arrayCapacity; ++i)
     {
         this->array[i] = rand() % 2;
+        std::cout <<  this->array[i] << " ";
     }
 }
 
@@ -33,7 +28,7 @@ void ParallelCalculator::sum()
     int pipeResult;
 
     // create two pipes for each worker
-    for(int i = 0; i < this->arrayCapacity; ++i)
+    for(int i = 0; i < this->workersCount; ++i)
     {
         pipeResult = pipe(this->parentChildFileDes[i]);
 
@@ -52,7 +47,7 @@ void ParallelCalculator::sum()
         }
     }
 
-    int fac = this->arrayCapacity / this -> workersCount;
+    int fac = this->arrayCapacity / this->workersCount;
 
     for(int i = 0; i < this->workersCount; ++i)
     {
@@ -75,15 +70,15 @@ void ParallelCalculator::sum()
             // close read end of child to parent pipe
             close(this->childParentFileDes[pid][READ_END]);
 
-            int from, to;
-            int sum = 0;
+            int from;
+            int to;
+            int sum;
             
             // read 'from' and 'to' from parent to child pipe
             read(this->parentChildFileDes[pid][READ_END], &from, sizeof(int));
             read(this->parentChildFileDes[pid][READ_END], &to, sizeof(int));
 
-
-            // calculate sum from i to j
+            // calculate sum
             for(int j = from; j < to; ++j)
             {
                 sum += this->array[j];
@@ -92,7 +87,7 @@ void ParallelCalculator::sum()
             // print sum
             std::cout << "Sum from " << from << " to " << to << " is " << sum << std::endl;
 
-            // write sum into child to parent pipe
+            // send sum to parent
             write(this->childParentFileDes[pid][WRITE_END], &sum, sizeof(int)); 
 
             exit(0);
@@ -111,17 +106,14 @@ void ParallelCalculator::sum()
             // up to end for the last element
             if(i == this->workersCount - 1)
             {
-                to = workersCount;
+                to =  this->arrayCapacity;
             }
             
-            // write 'from' and 'to' into parent to child pipe
+            // send 'from' and 'to' to child
             write(this->parentChildFileDes[this->workers[i]][WRITE_END], &from, sizeof(int));
             write(this->parentChildFileDes[this->workers[i]][WRITE_END], &to, sizeof(int));
         }
     }
-
-    // wait child processes
-    wait(NULL);
 
     int total = 0;
 
@@ -135,19 +127,17 @@ void ParallelCalculator::sum()
         total += sum;
     }
 
+    
     std::cout << "Total sum is " << total << std::endl;
+    
+    // wait child processes
+    wait(NULL);
 }
 
 ParallelCalculator::~ParallelCalculator()
 {
     delete [] this->array;
     delete[] this->workers;
-
-    for (int i = 0; i < this->workersCount; ++i) 
-    {
-        delete [] this->parentChildFileDes[i];
-        delete [] this->childParentFileDes[i];
-    }
 
     delete[] this->parentChildFileDes;
     delete[] this->childParentFileDes;

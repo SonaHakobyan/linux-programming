@@ -15,8 +15,8 @@ class ParallelCalculator
         int* array;
         pid_t* workers;
 
-        int** parentChildFileDes;
-        int** childParentFileDes;
+        int (*parentChildFileDes)[2];
+        int (*childParentFileDes)[2];
 
     public:
         ParallelCalculator(int arrayCapacity, int workersCount);
