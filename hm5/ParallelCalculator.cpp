@@ -100,18 +100,18 @@ void ParallelCalculator::sum()
             // close write end of child to parent pipe
             close(this->childParentFileDes[this->workers[i]][WRITE_END]);
 
-            int from = i * fac;
-            int to = (i + 1) * fac;
+            int* from = new int(i * fac);
+            int* to = new int((i + 1) * fac);
 
             // up to end for the last element
             if(i == this->workersCount - 1)
             {
-                to =  this->arrayCapacity;
+                to =  new int(this->arrayCapacity);
             }
             
             // send 'from' and 'to' to child
-            write(this->parentChildFileDes[this->workers[i]][WRITE_END], &from, sizeof(int));
-            write(this->parentChildFileDes[this->workers[i]][WRITE_END], &to, sizeof(int));
+            write(this->parentChildFileDes[this->workers[i]][WRITE_END], &from, sizeof(from));
+            write(this->parentChildFileDes[this->workers[i]][WRITE_END], &to, sizeof(from));
         }
     }
 

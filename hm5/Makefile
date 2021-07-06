@@ -1,7 +1,7 @@
 all: ParallelCalculator
 
 ParallelCalculator: main.o ParallelCalculator.o
-	g++ -pthread main.o ParallelCalculator.o -o ParallelCalculator
+	g++ main.o ParallelCalculator.o -o ParallelCalculator
 	
 main.o: main.cpp ParallelCalculator.h
 	g++ -c main.cpp -o main.o
