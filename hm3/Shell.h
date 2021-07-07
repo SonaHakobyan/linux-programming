@@ -1,5 +1,5 @@
-#ifndef PARALLEL_SCHEDULER_H
-#define PARALLEL_SCHEDULER_H
+#ifndef SHELL_H
+#define SHELL_H
 
 class Shell
 {
