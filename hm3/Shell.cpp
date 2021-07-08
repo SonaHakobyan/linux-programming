@@ -28,7 +28,6 @@ std::string lookup(const std::vector<std::string> &paths, const std::string prog
     for (int i = 0; i < paths.size(); ++i)
     {
        std::string temp = paths[i] + "/" + program;
-       std::cout << temp << std::endl;
 
        if (access(temp.c_str(), F_OK) == 0) 
        {
@@ -52,7 +51,7 @@ void Shell::run()
         std::vector<std::string> parts = split(command.c_str(), ' ');
 
         // extra room for sentinel
-        const char **argv = new const char* [parts.size() + 1];   
+        const char** argv = new const char* [parts.size() + 1];   
 
         // get filepath
         std::string filepath = parts[0].c_str();
@@ -75,25 +74,24 @@ void Shell::run()
         // copy args
         for(int i = 1; i < parts.size(); ++i)
         {
-            argv[i+1] = parts[i+1].c_str();
+            argv[i] = parts[i].c_str();
         }
 
         argv[parts.size() + 1] = NULL;
 
         // create process
-        pid_t pid = fork();
+        pid_t child = fork();
 
         // exit on failure
-        if(pid == -1)
+        if(child == -1)
         {
             exit(errno);
         }
 
-        if(pid == 0)
+        if(child == 0)
         {
-            const char* outPath = "/opt/silentshell/{PID}/out.std";
-            const char* inPath = "/opt/silentshell/{PID}/in.std";
-            const char* errPath = "/opt/silentshell/{PID}/err.std";
+            const char* outPath = "/opt/silentshell/out.std";
+            const char* inPath = "/opt/silentshell/in.std";
 
             std::fstream fsout;
             std::fstream fsin;
@@ -101,24 +99,25 @@ void Shell::run()
             fsout.open(outPath, std::ios::out);
             fsout.open(inPath, std::ios::in);
           
-            // get the file stream buffer
             std::streambuf* outFile = fsout.rdbuf();
             std::streambuf* inFile = fsin.rdbuf();
 
-            // redirect 
             std::cout.rdbuf(outFile);
             std::cin.rdbuf(inFile);
             
-            // exec command
             execv(argv[0], (char **)argv);
+            // std::cout << argv[0] << std::endl;
 
             fsout.close();
             fsin.close();
+
+            exit(0);
         }
         else
         {
-            // wait for child
-            wait(NULL);
+            // waiting for child
+            int status = -1;
+            waitpid(child, &status, 0);
         }
     }
 }
